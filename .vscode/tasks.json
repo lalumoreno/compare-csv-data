@@ -8,9 +8,10 @@
                 "/Zi",
                 "/EHsc",
                 "/nologo",
-                "/I${fileDirname}\\libxl-4.1.0\\include_c",
+                "/I${fileDirname}\\inc",
                 "/Fe${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "${file}"
+                "${file}",
+                "${fileDirname}\\src\\*.cpp"
             ],
             "options": {
                 "cwd": "${fileDirname}"
