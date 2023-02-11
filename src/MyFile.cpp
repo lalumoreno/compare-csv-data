@@ -9,6 +9,7 @@ using namespace std;
 
 void removeDuplicated(std::vector<int> &v);
 
+//TODO Create matrix class
 void MyFile::setPath(string path) {  
   _path = path;    
 }
@@ -36,8 +37,8 @@ void MyFile::printFileInfo() {
   
   cout << "----------------------- " << endl;
   cout << "path: " << _path << endl;
-  cout << "rows: " << getRowsNumber() << endl;
-  cout << "columns: " << getColNumber() << endl;
+  cout << "rows: " << getRowTotal() << endl;
+  cout << "columns: " << getColTotal() << endl;
   cout << "----------------------- " << endl << endl;
 
 }
@@ -72,13 +73,13 @@ bool MyFile::readCsv() {
   return true;
 }
 
-string MyFile::getStringInRowCol(int row, int col) {
+string MyFile::getStringByRowCol(int row, int col) {
   
   return _content[row][col];  
 
  }
 
-int MyFile::findColumnName(string word) {
+int MyFile::getColNumByTitle(string word) {
   //row
   for(int i=0;i<_content.size();i++) {
     //column
@@ -112,7 +113,8 @@ void removeDuplicated(vector<string> &v)
     v.erase(end, v.end());
 }
 
-vector<string> MyFile::getDataInColList(int col) {
+//Returns data in column without repeat values
+vector<string> MyFile::getListbyCol(int col) {
 
   vector<string> colData;
 
@@ -128,11 +130,11 @@ vector<string> MyFile::getDataInColList(int col) {
   return colData;
 }
 
-int MyFile::findStringinCol(int col, string word) {
+int MyFile::getRowByStringInCol(int col, string word) {
 
   //row
   for(int i=0;i<_content.size();i++) {
-    //column
+    //row
     if( word.compare(_content[i][col]) == 0 ) {
       return i;
     }    
@@ -141,7 +143,8 @@ int MyFile::findStringinCol(int col, string word) {
   return -1; 
 }
 
-void MyFile::setFilter(vector <string> v) {
+//TODO improve
+void MyFile::setFilterFromList(vector <string> v) {
 
   cout << "Filter by " << endl;
   int ite = 0;
@@ -154,9 +157,15 @@ void MyFile::setFilter(vector <string> v) {
 
   int option;
   cin >> option;
-  //TODO evaluate option
+  //TODO evaluate valid option
   _filter = v[option-1]; 
 
   cout << _filter << " filter selected " << endl;
+
+}
+
+vector<string> MyFile::getRowDatabyRow(int row) {
+
+  return _content[row];
 
 }

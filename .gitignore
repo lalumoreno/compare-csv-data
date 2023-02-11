@@ -1,6 +1,6 @@
 main.exe
 main.ilk
 main.pdb
-main.obj
+*.obj
 vc140.pdb
 
