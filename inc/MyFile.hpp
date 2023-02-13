@@ -8,7 +8,7 @@ class MyFile{
 
 private:
   std::string _path;
-  std::vector<std::vector<std::string>> _content;  
+  std::vector<std::vector<std::string>> _content;
 
   std::string getPath(){ return _path; };  
   
@@ -24,6 +24,7 @@ public:
   void printFileContent();
   void printFileInfo();
   std::string getStringByRowCol(int row, int col);
+  int getIntByRowCol(int row, int col);
   int getColNumByTitle(std::string word);
   int getRowByStringInCol(int col, std::string word);
   void printDataInCol(int col);

@@ -1,4 +1,4 @@
-NIU;Cod Conexion;Tipo de C;Nivel de T;Nivel de T Primario;% propiedad;Conex de Red;ID CX;ID MERCADO;Grupo de Calidad;Cod frontera;Cod Circuito;Cod Trafo;Cod DANE;Ubicación;Direccion;Cond Especiales;Tipo de Area Esp;Cod Area Esp;Estrato;Altitud;Longitud;Latitud;Autogenerador;Exporta Energia;Capacid Autogenerador;Tipo de generacion;Codig frontera Aut;Fecha entrada en operación;Contrato de respaldo;Capacidad respaldo
+NIU;Cod Conexión;Tipo de C;Nivel de T;Nivel de T Primario;% propiedad;Conex de Red;ID CX;ID MERCADO;Grupo de Calidad;Cod frontera;Cod Circuito;Cod Trafo;Cod DANE;Ubicación;Direccion;Cond Especiales;Tipo de Area Esp;Cod Area Esp;Estrato;Altitud;Longitud;Latitud;Autogenerador;Exporta Energia;Capacid Autogenerador;Tipo de generacion;Codig frontera Aut;Fecha entrada en operación;Contrato de respaldo;Capacidad respaldo
 2775431;3090TR1;2;2;0;101;2;62071;176;11;Frt11775;BO32;3090TR1;11001000;2;K 77J NO 65 A  23 S ;9;0;0;7;2630;-74.18210556;4.598710836;3;;;;;;;
 3601975;82840TR1;2;2;0;101;2;62071;176;11;Frt46952;MO32;82840TR1;25473000;2;CARRERA 13 A NO 7 54 INTERIOR 3;9;0;0;7;2549;-74.23206;4.71464017;3;;;;;;;
 2775028;34865TR1;2;2;0;101;2;62071;176;11;Frt47240;LP23;34865TR1;11001000;2;CL 17 NO 69 85;0;0;0;8;2584;-74.12239214;4.644533172;3;;;;;;;
@@ -42,5 +42,5 @@ NIU;Cod Conexion;Tipo de C;Nivel de T;Nivel de T Primario;% propiedad;Conex de R
 663369;40129TR1;2;1;2;100;1;62071;176;11;Frt30871;AU23;40129TR1;11001000;2;CALLE 138 No 10 A  42;1;0;0;8;2560.55;-74.03374016;4.718383476;3;;;;;;;
 2552828;72323TR1;2;1;2;100;2;62071;176;11;Frt23712;TB19;72323TR1;11001000;2;AK 106 No149 27 INT 2  69 IN 2 69 CC PLAZA IMPERI;1;0;0;8;2555.1;-74.09505677;4.750791163;3;;;;;;;
 6639123;87719TR1;2;1;2;0;2;62071;176;11;Frt33286;IA18;87719TR1;25126000;1;MP CHIA AV PASEO DE LOS ZIPAS CC FONTANAR ANCLA 1;1;0;0;8;2557.49;-74.03429802;4.88537918;3;;;;;;;
-1047597;39975TR1;2;1;2;0;2;62071;176;11;Frt30036;MR29;39975TR1;11001000;2;CARRERA 58 No 127 59 AP 2181;1;0;0;8;2560.48;-74.07094234;4.712065176;3;;;;;;;
+1047597;39975TR1;2;2;2;0;2;62071;176;11;Frt30036;MR29;39975TR1;11001000;2;CARRERA 58 No 127 59 AP 2181;1;0;0;8;2560.48;-74.07094234;4.712065176;3;;;;;;;
 390663;34450TR1;2;1;2;100;1;62071;176;11;Frt49724;LP21;34450TR1;11001000;2;KR 66 A NO 11 15;9;0;0;7;2589;-74.11881268;4.633932221;3;;;;;;;

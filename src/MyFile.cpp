@@ -37,8 +37,8 @@ void MyFile::printFileInfo() {
   
   cout << "----------------------- " << endl;
   cout << "path: " << _path << endl;
-  cout << "rows: " << getRowTotal() << endl;
-  cout << "columns: " << getColTotal() << endl;
+  cout << "filas: " << getRowTotal() << endl;
+  cout << "columnas: " << getColTotal() << endl;
   cout << "----------------------- " << endl << endl;
 
 }
@@ -46,8 +46,6 @@ void MyFile::printFileInfo() {
 bool MyFile::readCsv() {
 
   //TODO check that is a csv file
-  cout << "Opening, " << _path << endl;
-
   vector<string> row;
   string line, word;
   fstream file(_path, ios::in);
@@ -66,7 +64,7 @@ bool MyFile::readCsv() {
       _content.push_back(row); //save each row in content
     }
   } else {
-    cout<<"Could not open the file" << endl;
+    cout<<"No se pudo abrir el archivo: " << endl;
     return false;
   }
 
@@ -76,6 +74,12 @@ bool MyFile::readCsv() {
 string MyFile::getStringByRowCol(int row, int col) {
   
   return _content[row][col];  
+
+ }
+
+int MyFile::getIntByRowCol(int row, int col) {
+  
+  return stoi(_content[row][col]);  
 
  }
 
@@ -146,11 +150,15 @@ int MyFile::getRowByStringInCol(int col, string word) {
 //TODO improve
 void MyFile::setFilterFromList(vector <string> v) {
 
-  cout << "Filter by " << endl;
+  cout << "Seleccione filtro:" << endl<< endl;
   int ite = 0;
 
   for (auto it = v.cbegin(); it != v.cend(); ++it) {
-        cout << "option " << ++ite << ". " << *it << endl;
+        if(ite == 0){
+          ite++;
+          continue;
+        }
+        cout << ite++ << ". " << *it << endl;
     }
 
   cout << endl;
@@ -158,9 +166,9 @@ void MyFile::setFilterFromList(vector <string> v) {
   int option;
   cin >> option;
   //TODO evaluate valid option
-  _filter = v[option-1]; 
+  _filter = v[option]; 
 
-  cout << _filter << " filter selected " << endl;
+  cout << "Filtro seleccionado: " << _filter << endl;
 
 }
 
