@@ -9,16 +9,74 @@ using namespace std;
 
 void removeDuplicated(std::vector<int> &v);
 
-//TODO Create matrix class
-void MyFile::setPath(string path) {  
-  _path = path;    
+//with user input
+void MyFile::requestOpenFile(string FileName) {
+
+  while(true) {
+    cout << "Inserte ruta de " << FileName << ":";
+    if ( requestCsvPath() ) {    
+      if ( readCsv() ) {
+        printFileInfo();
+        break;
+      } 
+    }
+  }   
 }
 
-void MyFile::setPath() {
-  string path;
-  cout << "What is doc path? ";
-  getline(cin, path);    
+bool MyFile::openFile(string filePath) {
+     
+    if ( !setCsvPath(filePath) ) {
+      return false;
+    }
+    
+    if ( !readCsv() ) {
+        return false;
+    }
+    
+    printFileInfo();      
+    return true;
+}
+
+bool MyFile::isCsvFormat(string path) {
+  
+  if(path.size() < 5) {
+    cout << "ERROR: Ruta invalida [" << path  << "]"<< endl; 
+    return false; 
+  } 
+  
+  string format = path.substr(path.size()-4); 
+  if(format.compare(".csv") != 0 ) {
+    cout << "ERROR: El formato debe ser .csv [" << path  << "]"<< endl; 
+    return false;
+  }
+
+  return true;
+}
+
+bool MyFile::setCsvPath(string path) {
+
+  if (!isCsvFormat(path)) {
+    return false;
+  }
+
   _path = path;
+  return true;
+}
+
+bool MyFile::requestCsvPath() {
+
+  string path;  
+  getline(cin, path);    
+  
+  //Validate format
+  if (!isCsvFormat(path)) {
+    cin.clear();
+    return false;
+  }
+  
+  _path = path;  
+  return true;
+  
 }
 
 void MyFile::printFileContent() {
@@ -36,16 +94,16 @@ void MyFile::printFileContent() {
 void MyFile::printFileInfo() {  
   
   cout << "----------------------- " << endl;
-  cout << "path: " << _path << endl;
-  cout << "filas: " << getRowTotal() << endl;
-  cout << "columnas: " << getColTotal() << endl;
+  cout << "Ruta: " << _path << endl;
+  cout << "Filas: " << getRowTotal() << endl;
+  cout << "Columnas: " << getColTotal() << endl;
   cout << "----------------------- " << endl << endl;
 
 }
 
-bool MyFile::readCsv() {
 
-  //TODO check that is a csv file
+bool MyFile::readCsv() {
+  
   vector<string> row;
   string line, word;
   fstream file(_path, ios::in);
@@ -59,7 +117,7 @@ bool MyFile::readCsv() {
       //get each word in str sepparated by ; 
       while(getline(str, word, ';')) { 
         row.push_back(word); //save each word in row
-      }        
+      }    
 
       _content.push_back(row); //save each row in content
     }
