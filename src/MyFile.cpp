@@ -5,6 +5,8 @@
 
 #include "MyFile.hpp"
 
+#define DELIMITATOR ';'
+
 using namespace std;
 
 void removeDuplicated(std::vector<int> &v);
@@ -101,28 +103,46 @@ void MyFile::printFileInfo() {
 
 }
 
+bool MyFile::isExpectedDelimitator(string line) {
+  if (line.find(DELIMITATOR) != string::npos) {
+    return true;
+  } else {
+    cout<<"ERROR: Verifique que el delimitador es ';' en el archivo: [" << _path << "]" << endl;
+    return false;
+  }
+}
 
 bool MyFile::readCsv() {
   
   vector<string> row;
   string line, word;
   fstream file(_path, ios::in);
-  
+  bool firstRow = true;
+
   if(file.is_open()){
     while(getline(file, line))//get each line in file
     {
+      //Check if ';' delimitator
+      if(firstRow) {         
+        if (isExpectedDelimitator(line)) {
+          firstRow = false;          
+        } else {          
+          return false;
+        }
+      }
+
       row.clear();
       stringstream str(line); //get whole line string
  
       //get each word in str sepparated by ; 
-      while(getline(str, word, ';')) { 
+      while(getline(str, word, DELIMITATOR)) {
         row.push_back(word); //save each word in row
       }    
 
       _content.push_back(row); //save each row in content
     }
   } else {
-    cout<<"No se pudo abrir el archivo: " << endl;
+    cout<<"ERROR: No se puede abrir el archivo: [" << _path << "]" << endl;
     return false;
   }
 

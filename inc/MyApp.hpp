@@ -21,6 +21,7 @@ public:
     };
 
     void showAppDescription();
+    void showAppUse();
     int entryMenu();
     int exitMenu();    
     int Main();

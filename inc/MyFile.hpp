@@ -12,6 +12,7 @@ private:
   
   bool isCsvFormat(std::string path);
   int getColTotal(){ return getRowTotal() > 0? _content[0].size() : 0;}
+  bool isExpectedDelimitator(std::string line);
 
 public: 
 
