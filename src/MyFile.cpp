@@ -163,3 +163,14 @@ void MyFile::setFilterFromList(vector <string> v) {
   cout << "Filtro seleccionado: " << _filter << endl << endl;
 
 }
+
+void MyFile::save() {
+
+ fstream file(_path, ios::out); 
+
+ if(file.is_open()){
+
+  file << content.getStringByRowCol(0,0);
+
+ }
+}

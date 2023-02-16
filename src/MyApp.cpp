@@ -101,8 +101,6 @@ int MyApp::Main() {
   MyFile numCircFile;
   if(!numCircFile.openFile(FILE_NUM_CIRCUITO, false)) return APP_FAILURE;  
   //Open propiedad activo file for comparison
-  MyFile propFile;
-  if(!propFile.openFile(FILE_PROP, false)) return APP_FAILURE;
   MyFile propNT1File;
   if(!propNT1File.openFile(FILE_PROP_NT1, false)) return APP_FAILURE;  
 
@@ -124,70 +122,81 @@ int MyApp::Main() {
 
 
 
-  // ------------------  4. Request list filter
-  //filter Mithra doc by OPERADOR_RED  
+  // ------------------  4. Set list filter
   int refColFilterTitle = refFile.content.getColNumByTitle(FILTER_COL_TITLE);  
   vector<string> v = refFile.content.getListbyCol(refColFilterTitle);
   refFile.setFilterFromList(v);
 
 
 
-  // ------------------  5. Compare all columns
-  int refColTitle = configFile.content.getIntByRowCol(0,CONFIG_REF_COL)-1;
-  int tc1ColTitle = configFile.content.getIntByRowCol(0,CONFIG_TC1_COL)-1;
+  // ------------------  5. Apply Filter
+  //filter Mithra doc by OPERADOR_RED  
+  MyMatrix refFiltered;
+  refFiltered.addRow(refFile.content.getRowDatabyRow(TITLE_ROW));
 
-  vector<string> frontFound;
-  int row;  
-  string frontera;
-  int c;       
-  string refString;
-  string tc1String;
+  for(int row=1; row < refFile.content.getTotalRow(); row++) {
     
-  //for each row in Mithra doc, find frontera in TC1  
-  for(row=1; row < refFile.content.getTotalRow(); row++) {
-        
-      //Only compare rows that match with filter
       if(refFile.getFilter().compare(refFile.content.getStringByRowCol(row,refColFilterTitle)) != 0 )
         continue;
 
-      frontera = refFile.content.getStringByRowCol(row,refColTitle);   //Get frontera name in Mithra doc
-      c = tc1File.content.getRowByStringInCol(tc1ColTitle,frontera);   //Find frontera name in TC1
+      refFiltered.addRow(refFile.content.getRowDatabyRow(row));
+  }
+  
+  
+
+  // ------------------  6. Compare all columns
+  int refFronteraCol = configFile.content.getIntByRowCol(0,CONFIG_REF_COL)-1;
+  int tc1FronteraCol = configFile.content.getIntByRowCol(0,CONFIG_TC1_COL)-1;
+  
+  string fronteraName;
+  int fronteraTc1Row;  
+   int fronteraRefRow;     
+  string refString;
+  string tc1String;
+  vector<string> fronteras;
+  string restmp;
+  vector<string> result;
+  
+  //for each row in Mithra doc, find frontera in TC1  
+  for(int row=0; row < refFiltered.getTotalRow(); row++) {
+        
+      fronteraName = refFiltered.getStringByRowCol(row,refFronteraCol);                    //Get frontera name in Mithra doc
+      fronteraTc1Row = tc1File.content.getRowByStringInCol(tc1FronteraCol,fronteraName);   //Find frontera name in TC1
 
       //If found in TC1
-      if (c >= 0) {          
-        //cout << "word " << tmp << " found in row " << c << " of other doc" << endl;              
-        frontFound.push_back(frontera);
+      if (fronteraTc1Row >= 0) {                      
+        fronteras.push_back(fronteraName);
 
         //Compare all other columns with TC1
-        for(int configRow = 1; configRow<configFile.content.getTotalRow(); configRow++ ) {
+        for(int configRow = 1; configRow < configFile.content.getTotalRow(); configRow++ ) {
           
           int refCol = configFile.content.getIntByRowCol(configRow,CONFIG_REF_COL)-1;
           int tc1Col = configFile.content.getIntByRowCol(configRow,CONFIG_TC1_COL)-1;
 
-          string refTitle = refFile.content.getStringByRowCol(TITLE_ROW,refCol);
+          string refTitle = refFiltered.getStringByRowCol(TITLE_ROW,refCol);
           string tc1Title = tc1File.content.getStringByRowCol(TITLE_ROW,tc1Col);     
 
           //NUMERO DE CIRCUITO
           if(refCol == REF_NUM_CIRCUITO_COL) {            
-            int cod = refFile.content.getIntByRowCol(row,refCol);
+            int num = refFiltered.getIntByRowCol(row,refCol);
             string codString;            
 
             if(tc1Col == TC1_NUM_CIRCUITO_COL1) {
-              codString = numCircFile.content.getStringByRowCol(cod,CONFIG_TC1_COL);
+              codString = numCircFile.content.getStringByRowCol(num,CONFIG_TC1_COL);
             } else {
-              codString = numCircFile.content.getStringByRowCol(cod,CONFIG_TC1_COL+1);
+              codString = numCircFile.content.getStringByRowCol(num,CONFIG_TC1_COL+1);
             }        
             
             refString = codString;
             
           } //NIVEL DE TENSION
           else if (refCol == REF_DUENO_RED_COL) {            
-            int level = refFile.content.getIntByRowCol(row,REF_NIVEL_TENSION_COL);
+            int level = refFiltered.getIntByRowCol(row,REF_NIVEL_TENSION_COL);
             string levelString;
             int rowx;            
 
             if(level == 1) {
-              rowx = propNT1File.content.getRowByStringInCol(CONFIG_REF_COL, refFile.content.getStringByRowCol(row,refCol));           
+              rowx = propNT1File.content.getRowByStringInCol(CONFIG_REF_COL, refFiltered.getStringByRowCol(row,refCol));           
               levelString = propNT1File.content.getStringByRowCol(rowx,CONFIG_TC1_COL);
 
             } else {              
@@ -197,24 +206,55 @@ int MyApp::Main() {
             refString = levelString;
 
           } else {
-              refString = refFile.content.getStringByRowCol(row,refCol);
+              refString = refFiltered.getStringByRowCol(row,refCol);
           }
 
-          tc1String = tc1File.content.getStringByRowCol(c,tc1Col);
+          tc1String = tc1File.content.getStringByRowCol(fronteraTc1Row,tc1Col);
           
           if(!refString.empty() &&
             refString.compare(tc1String) != 0){
-            cout << frontera <<"; "<< refTitle << ": " << refString << ", " << tc1Title << ": " << tc1String << endl;
+            restmp = fronteraName + "; " + refTitle + ": " + refString + ", " + tc1Title + ": " + tc1String;
+            cout << restmp << endl;
+            result.push_back(restmp);
           }        
         }
       } else {
-        cout << frontera << "; no se encuentra en TC1" << endl;
+         restmp = fronteraName + "; no se encuentra en TC1";
+         cout << restmp << endl;
+         result.push_back(restmp);
       }      
     }
 
-    //TODO add option to show fronteras list
-    cout << endl << tc1File.content.getTotalRow()-1 << " fronteras en tc1" << endl;
-    cout << endl << frontFound.size() << " fronteras encontradas en tc1, revise las diferencias arriba" << endl;
+  // ------------------  6. Check if missed fronteras  
+  int tc1Fronteras = tc1File.content.getTotalRow()-1;
+  int refFronteras =  fronteras.size();
+
+  cout << endl << tc1Fronteras << " fronteras en tc1" << endl;
+  cout << refFronteras << " fronteras encontradas en tc1, revise las diferencias arriba" << endl << endl;
+
+  if(tc1Fronteras > refFronteras) {
+
+    //find missed fronteras in Mithra
+    for(int row = 1; row < tc1File.content.getTotalRow(); row++) {
+      fronteraName = tc1File.content.getStringByRowCol(row,tc1FronteraCol);            //Get frontera name in TC1 doc
+      fronteraRefRow = refFiltered.getRowByStringInCol(refFronteraCol,fronteraName);   //Find frontera name in Mithra doc
+
+      //If not found in Mithra
+      if (fronteraRefRow <= 0) {                     
+         restmp = fronteraName + "; no se encuentra en MITHRA doc pero si en TC1!!";
+         cout << restmp << endl;
+         result.push_back(restmp);
+      }
+
+    }    
+    
+  }
+
+  // ------------------  6. Save result in file
+  //TODO Fix
+  MyFile res("files/result.csv");
+  res.content.addRow(result);
+  res.save();
 
   return APP_SUCCESS;
 

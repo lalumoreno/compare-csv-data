@@ -11,19 +11,23 @@ private:
   
   bool isCsvFormat(std::string path);
   bool isExpectedDelimitator(std::string line);  
+  bool requestCsvPath(void);
+  bool readCsv();
+  bool setCsvPath(std::string path);
 
 public:
+  MyFile(){};
+  MyFile(std::string path):_path(path){};
+  
   MyMatrix content;
 
   std::string getPath() { return _path;}
   std::string getFilter() { return _filter;}  
-  bool requestCsvPath(void);
-  bool setCsvPath(std::string path);
-  bool readCsv();
   void printFileInfo();
   void setFilterFromList(std::vector <std::string> v);
   void requestOpenFile(std::string FileName, bool printInfo) ;
   bool openFile(std::string filePath, bool printInfo);
+  void save();
 };
 
 #endif
