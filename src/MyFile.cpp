@@ -164,13 +164,15 @@ void MyFile::setFilterFromList(vector <string> v) {
 
 }
 
-void MyFile::save() {
+void MyFile::writeCsv() {
 
  fstream file(_path, ios::out); 
 
  if(file.is_open()){
-
-  file << content.getStringByRowCol(0,0);
-
+  for(int row = 0; row < content.getTotalRow(); row++ ) {
+    for(int col = 0; col < content.getTotalCol(); col++) {
+      file << content.getStringByRowCol(row,col);
+    }      
+  }
  }
 }

@@ -76,10 +76,11 @@ int MyApp::entryMenu() {
 int MyApp::enterToContinue(string text) {
 
     string option;        
-    cout << text << endl;
-    cin.clear(); //TODO fix if other key si pressed
-    cin.ignore();    
-    return EXIT;                
+    cout << text << endl;    
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return EXIT;
+
 }
 
 int MyApp::Main() {
@@ -87,12 +88,12 @@ int MyApp::Main() {
   // ------------------  1. Open all files 
   //Open reference document by name  
   MyFile refFile;
-  //refFile.requestOpenFile("doc de Mithra", true); //TODO check that is Mithra valid doc  
-  refFile.openFile("files/ref.csv", true);
+  refFile.requestOpenFile("doc de Mithra", true); //TODO check that is Mithra valid doc  
+  //refFile.openFile("files/ref.csv", true);
   //Open TC1 by name
   MyFile tc1File;
-  //tc1File.requestOpenFile("TC1", true);           //TODO check that is tc1 valid doc
-  tc1File.openFile("files/tc1.csv", true);
+  tc1File.requestOpenFile("TC1", true);           //TODO check that is tc1 valid doc
+  //tc1File.openFile("files/tc1.csv", true);
   //Open config file for column association    
   MyFile configFile;                        
   if (!configFile.openFile(FILE_CONFIG, false)) return APP_FAILURE; //TODO check that is a config valid doc
@@ -147,19 +148,19 @@ int MyApp::Main() {
   // ------------------  6. Compare all columns
   int refFronteraCol = configFile.content.getIntByRowCol(0,CONFIG_REF_COL)-1;
   int tc1FronteraCol = configFile.content.getIntByRowCol(0,CONFIG_TC1_COL)-1;
-  
+    
   string fronteraName;
   int fronteraTc1Row;  
    int fronteraRefRow;     
   string refString;
   string tc1String;
   vector<string> fronteras;
-  string restmp;
-  vector<string> result;
+  vector<string> restmp;
+  MyMatrix result;
   
   //for each row in Mithra doc, find frontera in TC1  
-  for(int row=0; row < refFiltered.getTotalRow(); row++) {
-        
+  for(int row=1; row < refFiltered.getTotalRow(); row++) {
+            
       fronteraName = refFiltered.getStringByRowCol(row,refFronteraCol);                    //Get frontera name in Mithra doc
       fronteraTc1Row = tc1File.content.getRowByStringInCol(tc1FronteraCol,fronteraName);   //Find frontera name in TC1
 
@@ -213,15 +214,17 @@ int MyApp::Main() {
           
           if(!refString.empty() &&
             refString.compare(tc1String) != 0){
-            restmp = fronteraName + "; " + refTitle + ": " + refString + ", " + tc1Title + ": " + tc1String;
-            cout << restmp << endl;
-            result.push_back(restmp);
+            restmp.push_back(fronteraName);
+            restmp.push_back("; " + refTitle + ": " + refString + ", " + tc1Title + ": " + tc1String + "\n");            
+            result.addRow(restmp);
+            restmp.clear();
           }        
         }
       } else {
-         restmp = fronteraName + "; no se encuentra en TC1";
-         cout << restmp << endl;
-         result.push_back(restmp);
+         restmp.push_back(fronteraName);
+         restmp.push_back("; no se encuentra en TC1\n");         
+         result.addRow(restmp);
+         restmp.clear();
       }      
     }
 
@@ -230,7 +233,7 @@ int MyApp::Main() {
   int refFronteras =  fronteras.size();
 
   cout << endl << tc1Fronteras << " fronteras en tc1" << endl;
-  cout << refFronteras << " fronteras encontradas en tc1, revise las diferencias arriba" << endl << endl;
+  cout << refFronteras << " fronteras de Mithra encontradas en tc1" << endl << endl;
 
   if(tc1Fronteras > refFronteras) {
 
@@ -240,21 +243,25 @@ int MyApp::Main() {
       fronteraRefRow = refFiltered.getRowByStringInCol(refFronteraCol,fronteraName);   //Find frontera name in Mithra doc
 
       //If not found in Mithra
-      if (fronteraRefRow <= 0) {                     
-         restmp = fronteraName + "; no se encuentra en MITHRA doc pero si en TC1!!";
-         cout << restmp << endl;
-         result.push_back(restmp);
+      if (fronteraRefRow <= 0) {
+         restmp.push_back(fronteraName);                    
+         restmp.push_back("; no se encuentra en MITHRA doc pero si en TC1!!\n");         
+         result.addRow(restmp);
+         restmp.clear();
       }
-
     }    
-    
   }
 
-  // ------------------  6. Save result in file
-  //TODO Fix
-  MyFile res("files/result.csv");
-  res.content.addRow(result);
-  res.save();
+  // ------------------  6. Save result in file  
+  MyFile res("files/result.csv"); //TODO Change name by filter and date
+  res.content = result;
+  res.writeCsv();
+
+
+
+  // ------------------  7. Print result
+  enterToContinue("\nPresione enter para ver diferencias");
+  res.content.printMatrix();
 
   return APP_SUCCESS;
 

@@ -18,12 +18,11 @@ void removeDuplicated(vector<string> &v)
 
 void MyMatrix::printMatrix() {
   
-  for(int i=0;i<_matrix.size();i++) {
-    //column
-    for(int j=0;j<_matrix[i].size();j++) {
-      cout<<_matrix[i][j]<<" ";
+  for(int row=0;row<_matrix.size();row++) {    
+    for(int col=0;col<_matrix[row].size();col++) {
+      cout<<_matrix[row][col]<<" ";
     }
-    cout<< endl;
+    //cout<< endl;
   }
 }
 

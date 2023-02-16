@@ -27,7 +27,7 @@ public:
   void setFilterFromList(std::vector <std::string> v);
   void requestOpenFile(std::string FileName, bool printInfo) ;
   bool openFile(std::string filePath, bool printInfo);
-  void save();
+  void writeCsv();
 };
 
 #endif
