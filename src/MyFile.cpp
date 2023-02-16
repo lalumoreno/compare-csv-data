@@ -12,7 +12,7 @@ using namespace std;
 void removeDuplicated(std::vector<int> &v);
 
 //with user input
-void MyFile::requestOpenFile(string FileName) {
+void MyFile::requestOpenFile(string FileName, bool printInfo) {
 
   while(true) {
     cout << "Inserte ruta de " << FileName << ":";
@@ -25,7 +25,7 @@ void MyFile::requestOpenFile(string FileName) {
   }   
 }
 
-bool MyFile::openFile(string filePath) {
+bool MyFile::openFile(string filePath, bool printInfo) {
      
     if ( !setCsvPath(filePath) ) {
       return false;
@@ -35,7 +35,8 @@ bool MyFile::openFile(string filePath) {
         return false;
     }
     
-    printFileInfo();      
+    if (printInfo) printFileInfo();      
+
     return true;
 }
 
@@ -151,13 +152,20 @@ bool MyFile::readCsv() {
 
 string MyFile::getStringByRowCol(int row, int col) {
   
-  return _content[row][col];  
-
+  if (row < getRowTotal()) {
+    return _content[row][col];  
+  } else {
+    return "";
+  }
  }
 
 int MyFile::getIntByRowCol(int row, int col) {
-  
-  return stoi(_content[row][col]);  
+
+   if (row < getRowTotal()) {
+    return stoi(_content[row][col]); 
+  } else {
+    return -1;
+  }  
 
  }
 
@@ -195,17 +203,15 @@ void removeDuplicated(vector<string> &v)
     v.erase(end, v.end());
 }
 
-//Returns data in column without repeat values
+//Returns data in column without title and no repeated values
 vector<string> MyFile::getListbyCol(int col) {
 
   vector<string> colData;
 
   if(col > 0) {
-  //row
-  for(int i=0;i<_content.size();i++) {    
-      colData.push_back(_content[i][col]);
-    }      
-
+    for(int row=1; row<_content.size(); row++) {
+      colData.push_back(_content[row][col]);
+    }
     removeDuplicated(colData);
   }
 
@@ -225,28 +231,30 @@ int MyFile::getRowByStringInCol(int col, string word) {
   return -1; 
 }
 
-//TODO improve
 void MyFile::setFilterFromList(vector <string> v) {
+  
+  int i = 1;
+  int option;
+  int optionRow;
 
-  cout << "Seleccione filtro:" << endl<< endl;
-  int ite = 0;
-
+  cout << "Seleccione filtro:" << endl;  
   for (auto it = v.cbegin(); it != v.cend(); ++it) {
-        if(ite == 0){
-          ite++;
-          continue;
-        }
-        cout << ite++ << ". " << *it << endl;
+        cout << i++ << ". " << *it << endl;
     }
 
   cout << endl;
 
-  int option;
-  cin >> option;
-  //TODO evaluate valid option
-  _filter = v[option]; 
+  while(true) {
+    cin >> option;
+    optionRow = option-1;
+    if(optionRow >= v.size()) {
+      cout << "Opcion invalida" << endl;
+    } else break;
+  }
+    
+  _filter = v[optionRow]; 
 
-  cout << "Filtro seleccionado: " << _filter << endl;
+  cout << "Filtro seleccionado: " << _filter << endl << endl;
 
 }
 

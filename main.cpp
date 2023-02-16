@@ -11,7 +11,8 @@ int main()
   app.showAppUse();
 
   app.Main();
-  app.exitMenu();    
+  
+  app.enterToContinue("\nPresione enter para cerrar esta ventana");    
   
   return 0;
 }

@@ -8,16 +8,16 @@ class MyFile{
 
 private:
   std::string _path;
+  std::string _filter;
   std::vector<std::vector<std::string>> _content;
   
   bool isCsvFormat(std::string path);
   int getColTotal(){ return getRowTotal() > 0? _content[0].size() : 0;}
-  bool isExpectedDelimitator(std::string line);
+  bool isExpectedDelimitator(std::string line);  
 
-public: 
-
-  std::string _filter;
-
+public:   
+  std::string getPath() { return _path;}
+  std::string getFilter() { return _filter;}  
   bool requestCsvPath(void);
   bool setCsvPath(std::string path);
   bool readCsv();
@@ -32,8 +32,8 @@ public:
   std::vector<std::string> getListbyCol(int col);
   void setFilterFromList(std::vector <std::string> v);
   std::vector<std::string> getRowDatabyRow(int row);
-  void requestOpenFile(std::string FileName) ;
-  bool openFile(std::string filePath);
+  void requestOpenFile(std::string FileName, bool printInfo) ;
+  bool openFile(std::string filePath, bool printInfo);
 };
 
 #endif

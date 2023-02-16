@@ -19,12 +19,12 @@ using namespace std;
 #define CONFIG_REF_COL    0
 #define CONFIG_TC1_COL    1
 
-#define REF_NUM_CIRCUITO_COL    28
-#define REF_NIVEL_TENSION_COL   26
-#define REF_DUENO_RED_COL       32
+#define REF_NUM_CIRCUITO_COL    28-1 
+#define REF_NIVEL_TENSION_COL   26-1
+#define REF_DUENO_RED_COL       32-1
 
-#define TC1_NUM_CIRCUITO_COL1  2 //TOCO change name
-#define TC1_NUM_CIRCUITO_COL2  12  //TOCO change name
+#define TC1_NUM_CIRCUITO_COL1  2-1 //TOCO change name
+#define TC1_NUM_CIRCUITO_COL2  12-1  //TOCO change name
 
 //TODO read from file
 void MyApp::showAppDescription() {  
@@ -73,90 +73,104 @@ int MyApp::entryMenu() {
     }    
 }
 
-int MyApp::exitMenu() {
+int MyApp::enterToContinue(string text) {
 
-    int option;    
-    //TODO improve not to use enter
-    cout << endl << "Ahora puede cerrar esta ventana" << endl;
-    cin >> option;
+    string option;        
+    cout << text << endl;
+    cin.clear(); //TODO fix if other key si pressed
+    cin.ignore();    
     return EXIT;                
 }
 
 int MyApp::Main() {
 
   // ------------------  1. Open all files 
-  //Open reference document by name    
+  //Open reference document by name  
   MyFile refFile;
-  refFile.requestOpenFile("doc de Mithra");    
+  //refFile.requestOpenFile("doc de Mithra", true); //TODO check that is Mithra valid doc  
+  refFile.openFile("files/ref.csv", true);
   //Open TC1 by name
   MyFile tc1File;
-  tc1File.requestOpenFile("TC1");
+  //tc1File.requestOpenFile("TC1", true);           //TODO check that is tc1 valid doc
+  tc1File.openFile("files/tc1.csv", true);
   //Open config file for column association    
-  MyFile config;                      //TODO create class for config files and not show all info  
-  if (!config.openFile(FILE_CONFIG)) return APP_FAILURE;
+  MyFile configFile;                        
+  if (!configFile.openFile(FILE_CONFIG, false)) return APP_FAILURE; //TODO check that is a config valid doc
   //TODO print name of columns to compare
   //Open numeroCircuito file for comparison
   MyFile numCircFile;
-  if(!numCircFile.openFile(FILE_NUM_CIRCUITO)) return APP_FAILURE;  
+  if(!numCircFile.openFile(FILE_NUM_CIRCUITO, false)) return APP_FAILURE;  
   //Open propiedad activo file for comparison
   MyFile propFile;
-  if(!propFile.openFile(FILE_PROP)) return APP_FAILURE;
+  if(!propFile.openFile(FILE_PROP, false)) return APP_FAILURE;
   MyFile propNT1File;
-  if(!propNT1File.openFile(FILE_PROP_NT1)) return APP_FAILURE;  
-    
-  /*
-  cout << "compare " << refDoc.getStringByRowCol(0,configFile.getIntByRowCol(0,0)-1) <<
-  " with " << otherDoc.getStringByRowCol(0,configFile.getIntByRowCol(0,1)-1) << endl;
-  */
+  if(!propNT1File.openFile(FILE_PROP_NT1, false)) return APP_FAILURE;  
 
-  // ------------------  2. Compare files
-  //filter ref doc by OPERADOR_RED
-  //TODO Read filter name from config file
-  int refColFilterTitle = refFile.getColNumByTitle(FILTER_COL_TITLE);
+
+
+  //------------------  2. Print columns to compare
+  cout << "Las siguientes columnas van a ser comparadas " << endl;
+  cout << "[Mithra] \t\t[TC1]" << endl; 
+  for(int r=0; r < configFile.getRowTotal(); r++) {
+    cout << refFile.getStringByRowCol(TITLE_ROW, configFile.getIntByRowCol(r, CONFIG_REF_COL)-1) <<"\t\t" 
+         << tc1File.getStringByRowCol(TITLE_ROW, configFile.getIntByRowCol(r,CONFIG_TC1_COL)-1) << endl;
+  }
+  cout << endl;
+  
+
+
+  // ------------------  3. Request confirmation to continue
+  enterToContinue("Presione enter para continuar");
+
+
+
+  // ------------------  4. Request list filter
+  //filter Mithra doc by OPERADOR_RED  
+  int refColFilterTitle = refFile.getColNumByTitle(FILTER_COL_TITLE);  
   vector<string> v = refFile.getListbyCol(refColFilterTitle);
-
   refFile.setFilterFromList(v);
 
-  //Look for title in ref and TC1 file
-  int refColTitle1 = config.getIntByRowCol(0,0)-1;
-  int otherColTitle1 = config.getIntByRowCol(0,1)-1;
-  
-  vector<string> rowFound;
-  int row;  
 
-  //FILTER
-  if(refColTitle1 >= 0) {    
-    string tmp;
-    int c;       
-    string refString;
-    string tc1String;
+
+  // ------------------  5. Compare all columns
+  int refColTitle = configFile.getIntByRowCol(0,CONFIG_REF_COL)-1;
+  int tc1ColTitle = configFile.getIntByRowCol(0,CONFIG_TC1_COL)-1;
+
+  vector<string> frontFound;
+  int row;  
+  string frontera;
+  int c;       
+  string refString;
+  string tc1String;
     
-    //for each row in column of ref, find frontera in TC1
-    for(row=1;row<refFile.getRowTotal();row++) {
-      
-      //If ref filter does not match
-      if(refFile._filter.compare(refFile.getStringByRowCol(row,refColFilterTitle)) != 0 )
+  //for each row in Mithra doc, find frontera in TC1  
+  for(row=1; row < refFile.getRowTotal(); row++) {
+        
+      //Only compare rows that match with filter
+      if(refFile.getFilter().compare(refFile.getStringByRowCol(row,refColFilterTitle)) != 0 )
         continue;
 
-      tmp = refFile.getStringByRowCol(row,refColTitle1);      
-      c = tc1File.getRowByStringInCol(otherColTitle1,tmp);
-      if (c >= 0) {               
-        //cout << "word " << tmp << " found in row " << c << " of other doc" << endl;              
-        rowFound.push_back(tmp);
+      frontera = refFile.getStringByRowCol(row,refColTitle);   //Get frontera name in Mithra doc
+      c = tc1File.getRowByStringInCol(tc1ColTitle,frontera);   //Find frontera name in TC1
 
-        //Compare all other columns with tc1
-        for(int y = 1; y<config.getRowTotal(); y++ ) {
+      //If found in TC1
+      if (c >= 0) {          
+        //cout << "word " << tmp << " found in row " << c << " of other doc" << endl;              
+        frontFound.push_back(frontera);
+
+        //Compare all other columns with TC1
+        for(int configRow = 1; configRow<configFile.getRowTotal(); configRow++ ) {
           
-          int refCol = config.getIntByRowCol(y,CONFIG_REF_COL)-1;
-          int tc1Col = config.getIntByRowCol(y,CONFIG_TC1_COL)-1;
+          int refCol = configFile.getIntByRowCol(configRow,CONFIG_REF_COL)-1;
+          int tc1Col = configFile.getIntByRowCol(configRow,CONFIG_TC1_COL)-1;
 
           string refTitle = refFile.getStringByRowCol(TITLE_ROW,refCol);
           string tc1Title = tc1File.getStringByRowCol(TITLE_ROW,tc1Col);     
 
           //NUMERO DE CIRCUITO
-          if(refCol == REF_NUM_CIRCUITO_COL) {
+          if(refCol == REF_NUM_CIRCUITO_COL) {            
             int cod = refFile.getIntByRowCol(row,refCol);
-            string codString;
+            string codString;            
 
             if(tc1Col == TC1_NUM_CIRCUITO_COL1) {
               codString = numCircFile.getStringByRowCol(cod,CONFIG_TC1_COL);
@@ -167,17 +181,17 @@ int MyApp::Main() {
             refString = codString;
             
           } //NIVEL DE TENSION
-          else if (refCol == REF_DUENO_RED_COL) {
-            int level = refFile.getIntByRowCol(row,REF_NIVEL_TENSION_COL-1);
+          else if (refCol == REF_DUENO_RED_COL) {            
+            int level = refFile.getIntByRowCol(row,REF_NIVEL_TENSION_COL);
             string levelString;
-            int rowx;
+            int rowx;            
 
             if(level == 1) {
               rowx = propNT1File.getRowByStringInCol(CONFIG_REF_COL, refFile.getStringByRowCol(row,refCol));           
               levelString = propNT1File.getStringByRowCol(rowx,CONFIG_TC1_COL);
 
             } else {              
-              levelString = "101";
+              levelString = "101"; //TODO get from config file
             }
 
             refString = levelString;
@@ -188,19 +202,19 @@ int MyApp::Main() {
 
           tc1String = tc1File.getStringByRowCol(c,tc1Col);
           
-          if(refString.compare(tc1String) != 0){
-            cout << tmp <<"; "<< refTitle << ": " << refString << ", " << tc1Title << ": " << tc1String << endl;
+          if(!refString.empty() &&
+            refString.compare(tc1String) != 0){
+            cout << frontera <<"; "<< refTitle << ": " << refString << ", " << tc1Title << ": " << tc1String << endl;
           }        
         }
       } else {
-        cout << tmp << "; no se encuentra en TC1" << endl;
+        cout << frontera << "; no se encuentra en TC1" << endl;
       }      
     }
 
     //TODO add option to show fronteras list
-    cout << endl << rowFound.size() << " fronteras encontradas en tc1, revise las diferencias arriba" << endl;
-  
-  } 
+    cout << endl << tc1File.getRowTotal()-1 << " fronteras en tc1" << endl;
+    cout << endl << frontFound.size() << " fronteras encontradas en tc1, revise las diferencias arriba" << endl;
 
   return APP_SUCCESS;
 

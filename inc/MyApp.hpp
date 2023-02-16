@@ -23,7 +23,7 @@ public:
     void showAppDescription();
     void showAppUse();
     int entryMenu();
-    int exitMenu();    
+    int enterToContinue(std::string text);    
     int Main();
 
 };
