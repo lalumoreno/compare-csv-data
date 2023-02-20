@@ -21,8 +21,7 @@ public:
     };
 
     void showAppDescription();
-    void showAppUse();
-    int entryMenu();
+    void showAppUse();    
     int enterToContinue(std::string text);    
     int Main();
 

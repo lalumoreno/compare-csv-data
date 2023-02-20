@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
   MyApp app; 
-  //int initMenuOption = MyApp::NOT_VALID;
+    
   app.showAppDescription();
   app.showAppUse();
 

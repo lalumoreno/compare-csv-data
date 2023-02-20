@@ -133,7 +133,8 @@ bool MyFile::readCsv() {
     cout<<"ERROR: No se puede abrir el archivo: [" << _path << "]" << endl;
     return false;
   }
-
+  
+  file.close();
   return true;
 }
 
@@ -152,6 +153,8 @@ void MyFile::setFilterFromList(vector <string> v) {
 
   while(true) {
     cin >> option;
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     optionRow = option-1;
     if(optionRow >= v.size()) {
       cout << "Opcion invalida" << endl;
@@ -164,15 +167,24 @@ void MyFile::setFilterFromList(vector <string> v) {
 
 }
 
-void MyFile::writeCsv() {
+bool MyFile::writeCsv() {
 
- fstream file(_path, ios::out); 
+ fstream file(_path, ios::out);
 
  if(file.is_open()){
-  for(int row = 0; row < content.getTotalRow(); row++ ) {
+  for(int row = 0; row < content.getTotalRow(); row++ ) {    
     for(int col = 0; col < content.getTotalCol(); col++) {
       file << content.getStringByRowCol(row,col);
-    }      
+      file << DELIMITATOR;
+    }
+    file << endl;     
   }
+ } else {
+    cout<<"ERROR: No se puede abrir el archivo: [" << _path << "]" << endl;
+    return false;
  }
+
+  file.close();
+  return true; 
+ 
 }

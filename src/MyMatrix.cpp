@@ -22,7 +22,7 @@ void MyMatrix::printMatrix() {
     for(int col=0;col<_matrix[row].size();col++) {
       cout<<_matrix[row][col]<<" ";
     }
-    //cout<< endl;
+    cout<< endl;
   }
 }
 

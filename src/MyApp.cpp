@@ -1,4 +1,8 @@
 #include <iostream>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
+
 #include "MyApp.hpp"
 #include "MyFile.hpp"
 
@@ -6,12 +10,11 @@ using namespace std;
 
 #define VERSION "1.0.0"
 
-#define FILE_CONFIG     "files/config.csv"
+#define FILE_CONFIG       "files/config.csv"
 #define FILE_NUM_CIRCUITO "files/numeroCircuito.csv"
-#define FILE_PROP_NT1   "files/propActivoNT1.csv"
-#define FILE_PROP       "files/propActivo.csv"
+#define FILE_PROP_NT1     "files/propActivoNT1.csv"
 
-#define FILTER_COL_TITLE "OPERADOR_RED"
+#define FILTER_COL_TITLE  "OPERADOR_RED"
 
 #define TITLE_ROW         0
 #define FIRST_VALUE_ROW   1
@@ -23,8 +26,8 @@ using namespace std;
 #define REF_NIVEL_TENSION_COL   26-1
 #define REF_DUENO_RED_COL       32-1
 
-#define TC1_NUM_CIRCUITO_COL1  2-1 //TOCO change name
-#define TC1_NUM_CIRCUITO_COL2  12-1  //TOCO change name
+#define TC1_NUM_CIRCUITO_COL1  2-1    //TODO change name
+#define TC1_NUM_CIRCUITO_COL2  12-1   //TODO change name
 
 //TODO read from file
 void MyApp::showAppDescription() {  
@@ -42,35 +45,10 @@ void MyApp::showAppUse() {
     cout << "************************************************************************************" << endl;    
     cout << "Antes de empezar:" << endl;
     cout << "1. Verifique que junto a este programa se encuentra la carpeta 'files' con los  " << endl; 
-    cout << "   siguientes archivos: numeroCircuito.csv, porcentaje.csv y config.csv" << endl;
+    cout << "   siguientes archivos: config.csv, numeroCircuito.csv, propActivoNT1.csv" << endl;
     cout << "2. Verifique que el archivo de Mithra y el TC1 se encuentran en formato csv separado" << endl;
     cout << "   por ';'" << endl;    
     cout << "************************************************************************************" << endl << endl;
-}
-
-int MyApp::entryMenu() {
-
-    int option;    
-
-    cout << "1. Empezar" << endl;
-    cout << "2. Mas informacion" << endl;
-    cout << "3. Salir" << endl;    
-    cin >> option;
-
-    switch(option) {
-        case 1:
-            return ENTER;                  
-        case 2:
-            cout << "Mas informacion disponible proximamente" << endl << endl;            
-            return INFO;            
-        case 3:            
-            return EXIT;            
-        default:
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Opcion invalida" << endl << endl;
-            return NOT_VALID;            
-    }    
 }
 
 int MyApp::enterToContinue(string text) {
@@ -88,16 +66,13 @@ int MyApp::Main() {
   // ------------------  1. Open all files 
   //Open reference document by name  
   MyFile refFile;
-  refFile.requestOpenFile("doc de Mithra", true); //TODO check that is Mithra valid doc  
-  //refFile.openFile("files/ref.csv", true);
+  refFile.requestOpenFile("doc de Mithra", true); //TODO check that is Mithra valid doc    
   //Open TC1 by name
   MyFile tc1File;
-  tc1File.requestOpenFile("TC1", true);           //TODO check that is tc1 valid doc
-  //tc1File.openFile("files/tc1.csv", true);
+  tc1File.requestOpenFile("TC1", true);           //TODO check that is tc1 valid doc  
   //Open config file for column association    
   MyFile configFile;                        
   if (!configFile.openFile(FILE_CONFIG, false)) return APP_FAILURE; //TODO check that is a config valid doc
-  //TODO print name of columns to compare
   //Open numeroCircuito file for comparison
   MyFile numCircFile;
   if(!numCircFile.openFile(FILE_NUM_CIRCUITO, false)) return APP_FAILURE;  
@@ -109,8 +84,9 @@ int MyApp::Main() {
 
   //------------------  2. Print columns to compare
   cout << "Las siguientes columnas van a ser comparadas " << endl;
-  cout << "[Mithra] \t\t[TC1]" << endl; 
-  for(int r=0; r < configFile.content.getTotalRow(); r++) {
+  cout << configFile.content.getStringByRowCol(TITLE_ROW, CONFIG_REF_COL) <<"\t\t\t" 
+       << configFile.content.getStringByRowCol(TITLE_ROW, CONFIG_TC1_COL) << endl;
+  for(int r=1; r < configFile.content.getTotalRow(); r++) {
     cout << refFile.content.getStringByRowCol(TITLE_ROW, configFile.content.getIntByRowCol(r, CONFIG_REF_COL)-1) <<"\t\t" 
          << tc1File.content.getStringByRowCol(TITLE_ROW, configFile.content.getIntByRowCol(r,CONFIG_TC1_COL)-1) << endl;
   }
@@ -146,8 +122,8 @@ int MyApp::Main() {
   
 
   // ------------------  6. Compare all columns
-  int refFronteraCol = configFile.content.getIntByRowCol(0,CONFIG_REF_COL)-1;
-  int tc1FronteraCol = configFile.content.getIntByRowCol(0,CONFIG_TC1_COL)-1;
+  int refFronteraCol = configFile.content.getIntByRowCol(1,CONFIG_REF_COL)-1;
+  int tc1FronteraCol = configFile.content.getIntByRowCol(1,CONFIG_TC1_COL)-1;
     
   string fronteraName;
   int fronteraTc1Row;  
@@ -155,7 +131,7 @@ int MyApp::Main() {
   string refString;
   string tc1String;
   vector<string> fronteras;
-  vector<string> restmp;
+  vector<string> tmpRow;
   MyMatrix result;
   
   //for each row in Mithra doc, find frontera in TC1  
@@ -169,7 +145,7 @@ int MyApp::Main() {
         fronteras.push_back(fronteraName);
 
         //Compare all other columns with TC1
-        for(int configRow = 1; configRow < configFile.content.getTotalRow(); configRow++ ) {
+        for(int configRow = 2; configRow < configFile.content.getTotalRow(); configRow++ ) {
           
           int refCol = configFile.content.getIntByRowCol(configRow,CONFIG_REF_COL)-1;
           int tc1Col = configFile.content.getIntByRowCol(configRow,CONFIG_TC1_COL)-1;
@@ -184,14 +160,14 @@ int MyApp::Main() {
 
             if(tc1Col == TC1_NUM_CIRCUITO_COL1) {
               codString = numCircFile.content.getStringByRowCol(num,CONFIG_TC1_COL);
-            } else {
+            } else { //TC1_NUM_CIRCUITO_COL2
               codString = numCircFile.content.getStringByRowCol(num,CONFIG_TC1_COL+1);
             }        
-            
+            //TODO: This string may be empty as long as numCircFile is incomplete
             refString = codString;
             
           } //NIVEL DE TENSION
-          else if (refCol == REF_DUENO_RED_COL) {            
+          else if (refCol == REF_DUENO_RED_COL) {        
             int level = refFiltered.getIntByRowCol(row,REF_NIVEL_TENSION_COL);
             string levelString;
             int rowx;            
@@ -212,19 +188,18 @@ int MyApp::Main() {
 
           tc1String = tc1File.content.getStringByRowCol(fronteraTc1Row,tc1Col);
           
+          //TODO remove empty filter
           if(!refString.empty() &&
-            refString.compare(tc1String) != 0){
-            restmp.push_back(fronteraName);
-            restmp.push_back("; " + refTitle + ": " + refString + ", " + tc1Title + ": " + tc1String + "\n");            
-            result.addRow(restmp);
-            restmp.clear();
+            refString.compare(tc1String) != 0) {
+            tmpRow.clear();
+            tmpRow.push_back(fronteraName); tmpRow.push_back(refTitle + ": " + refString + ", " + tc1Title + ": " + tc1String);            
+            result.addRow(tmpRow);            
           }        
         }
       } else {
-         restmp.push_back(fronteraName);
-         restmp.push_back("; no se encuentra en TC1\n");         
-         result.addRow(restmp);
-         restmp.clear();
+         tmpRow.clear();
+         tmpRow.push_back(fronteraName); tmpRow.push_back("no se encuentra en TC1");         
+         result.addRow(tmpRow);
       }      
     }
 
@@ -244,19 +219,32 @@ int MyApp::Main() {
 
       //If not found in Mithra
       if (fronteraRefRow <= 0) {
-         restmp.push_back(fronteraName);                    
-         restmp.push_back("; no se encuentra en MITHRA doc pero si en TC1!!\n");         
-         result.addRow(restmp);
-         restmp.clear();
+         tmpRow.clear();
+         tmpRow.push_back(fronteraName); tmpRow.push_back("no se encuentra en MITHRA doc pero si en TC1!!");         
+         result.addRow(tmpRow);         
       }
     }    
   }
 
-  // ------------------  6. Save result in file  
-  MyFile res("files/result.csv"); //TODO Change name by filter and date
-  res.content = result;
-  res.writeCsv();
+  // ------------------  6. Save result in file
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::ostringstream oss;
+  oss << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
+  string resultFile = refFile.getFilter() + "_" + oss.str() + ".csv";
+  
+  //Add files names
+  tmpRow.clear();
+  tmpRow.push_back("Mithra doc"); tmpRow.push_back(refFile.getPath());
+  result.addRow(tmpRow);         
 
+  tmpRow.clear();
+  tmpRow.push_back("TC1 doc"); tmpRow.push_back(tc1File.getPath());
+  result.addRow(tmpRow);         
+
+  MyFile res("files/"+resultFile);
+  res.content = result;  
+  if(res.writeCsv()) cout << "Diferencias guardadas en " << res.getPath() << endl << endl;
 
 
   // ------------------  7. Print result
