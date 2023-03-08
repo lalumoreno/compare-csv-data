@@ -5,9 +5,12 @@
 
 #include "MyFile.hpp"
 
-#define DELIMITATOR ';'
+#define DELIMITATOR1     ';'
+#define DELIMITATOR2     ','
 
 using namespace std;
+
+string FILE_FORMAT = ".csv";
 
 //with user input
 void MyFile::requestOpenFile(string FileName, bool printInfo) {
@@ -38,15 +41,16 @@ bool MyFile::openFile(string filePath, bool printInfo) {
     return true;
 }
 
-bool MyFile::isCsvFormat(string path) {
-  
-  if(path.size() < 5) {
+bool MyFile::isCsvFormat(string path) {  
+
+  if(path.size() < FILE_FORMAT.size()) {
     cout << "ERROR: Ruta invalida [" << path  << "]"<< endl; 
     return false; 
-  } 
+  }
   
-  string format = path.substr(path.size()-4); 
-  if(format.compare(".csv") != 0 ) {
+  string format = path.substr(path.size()-FILE_FORMAT.size());
+  
+  if(format.compare(FILE_FORMAT) != 0 ) {
     cout << "ERROR: El formato debe ser .csv [" << path  << "]"<< endl; 
     return false;
   }
@@ -91,7 +95,7 @@ void MyFile::printFileInfo() {
 }
 
 bool MyFile::isExpectedDelimitator(string line) {
-  if (line.find(DELIMITATOR) != string::npos) {
+  if (line.find(DELIMITATOR1) != string::npos) {
     return true;
   } else {
     cout<<"ERROR: Verifique que el delimitador es ';' en el archivo: [" << _path << "]" << endl;
@@ -122,7 +126,7 @@ bool MyFile::readCsv() {
       stringstream str(line); //get whole line string
  
       //get each word in str sepparated by ; 
-      while(getline(str, word, DELIMITATOR)) {
+      while(getline(str, word, DELIMITATOR1)) {
         row.push_back(word); //save each word in row
       }    
 
@@ -175,7 +179,7 @@ bool MyFile::writeCsv() {
   for(int row = 0; row < content.getTotalRow(); row++ ) {    
     for(int col = 0; col < content.getTotalCol(); col++) {
       file << content.getStringByRowCol(row,col);
-      file << DELIMITATOR;
+      file << DELIMITATOR1;
     }
     file << endl;     
   }

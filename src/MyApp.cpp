@@ -8,11 +8,12 @@
 
 using namespace std;
 
-#define VERSION "1.0.0"
+#define VERSION "1.0.2"
 
 #define FILE_CONFIG       "files/config.csv"
-#define FILE_NUM_CIRCUITO "files/numeroCircuito.csv"
 #define FILE_PROP_NT1     "files/propActivoNT1.csv"
+#define FILE_NUM_CIRCUITO "files/Circuitos_Todos.csv"
+#define FILE_MITHRA       "files/Fron_y_Asoc.csv"
 
 #define FILTER_COL_TITLE  "OPERADOR_RED"
 
@@ -28,6 +29,10 @@ using namespace std;
 
 #define TC1_NUM_CIRCUITO_COL1  2-1    //TODO change name
 #define TC1_NUM_CIRCUITO_COL2  12-1   //TODO change name
+
+#define CIR_ID_COL      5-1  //ID Circuito
+#define CIRC_NAME_COL   6-1  //Nombre
+#define CIRC_COD_COL    8-1  //Codigo alimentador
 
 //TODO read from file
 void MyApp::showAppDescription() {  
@@ -45,8 +50,9 @@ void MyApp::showAppUse() {
     cout << "************************************************************************************" << endl;    
     cout << "Antes de empezar:" << endl;
     cout << "1. Verifique que junto a este programa se encuentra la carpeta 'files' con los  " << endl; 
-    cout << "   siguientes archivos: config.csv, numeroCircuito.csv, propActivoNT1.csv" << endl;
-    cout << "2. Verifique que el archivo de Mithra y el TC1 se encuentran en formato csv separado" << endl;
+    cout << "   siguientes archivos: config.csv, Circuitos_Todos.csv, propActivoNT1.csv y " << endl;
+    cout << "   Fron_y_Asoc.csv" << endl;
+    cout << "2. Verifique que todos los archivos se encuentran en formato csv separado" << endl;
     cout << "   por ';'" << endl;    
     cout << "************************************************************************************" << endl << endl;
 }
@@ -66,7 +72,7 @@ int MyApp::Main() {
   // ------------------  1. Open all files 
   //Open reference document by name  
   MyFile refFile;
-  refFile.requestOpenFile("doc de Mithra", true); //TODO check that is Mithra valid doc    
+  if(!refFile.openFile(FILE_MITHRA, true)) return APP_FAILURE; //TODO check that is Mithra valid doc    
   //Open TC1 by name
   MyFile tc1File;
   tc1File.requestOpenFile("TC1", true);           //TODO check that is tc1 valid doc  
@@ -74,8 +80,8 @@ int MyApp::Main() {
   MyFile configFile;                        
   if (!configFile.openFile(FILE_CONFIG, false)) return APP_FAILURE; //TODO check that is a config valid doc
   //Open numeroCircuito file for comparison
-  MyFile numCircFile;
-  if(!numCircFile.openFile(FILE_NUM_CIRCUITO, false)) return APP_FAILURE;  
+  MyFile circuits;
+  if(!circuits.openFile(FILE_NUM_CIRCUITO, false)) return APP_FAILURE;
   //Open propiedad activo file for comparison
   MyFile propNT1File;
   if(!propNT1File.openFile(FILE_PROP_NT1, false)) return APP_FAILURE;  
@@ -119,6 +125,7 @@ int MyApp::Main() {
       refFiltered.addRow(refFile.content.getRowDatabyRow(row));
   }
   
+  //refFiltered.printMatrix();
   
 
   // ------------------  6. Compare all columns
@@ -141,7 +148,7 @@ int MyApp::Main() {
       fronteraTc1Row = tc1File.content.getRowByStringInCol(tc1FronteraCol,fronteraName);   //Find frontera name in TC1
 
       //If found in TC1
-      if (fronteraTc1Row >= 0) {                      
+      if (fronteraTc1Row >= 0) {                    
         fronteras.push_back(fronteraName);
 
         //Compare all other columns with TC1
@@ -154,17 +161,26 @@ int MyApp::Main() {
           string tc1Title = tc1File.content.getStringByRowCol(TITLE_ROW,tc1Col);     
 
           //NUMERO DE CIRCUITO
-          if(refCol == REF_NUM_CIRCUITO_COL) {            
-            int num = refFiltered.getIntByRowCol(row,refCol);
-            string codString;            
+          if(refCol == REF_NUM_CIRCUITO_COL) { 
+            string num = refFiltered.getStringByRowCol(row,refCol);   //get num_circuito from ref                         
+            int rowNum = circuits.content.getRowByStringInCol(CIR_ID_COL, num); //get row of num_circuito in circuitos_todos           
+            string codString;
+
+            //num_circuito not found in circuitos_todos
+            if(rowNum < 0) {     
+              tmpRow.clear();
+              tmpRow.push_back(fronteraName); tmpRow.push_back(refTitle + ": " + refString + ", no se encuentra en " + circuits.getPath());            
+              result.addRow(tmpRow);
+              continue;       
+            }                                           
 
             if(tc1Col == TC1_NUM_CIRCUITO_COL1) {
-              codString = numCircFile.content.getStringByRowCol(num,CONFIG_TC1_COL);
+              codString = circuits.content.getStringByRowCol(rowNum, CIRC_NAME_COL);
             } else { //TC1_NUM_CIRCUITO_COL2
-              codString = numCircFile.content.getStringByRowCol(num,CONFIG_TC1_COL+1);
-            }        
-            //TODO: This string may be empty as long as numCircFile is incomplete
-            refString = codString;
+              codString = circuits.content.getStringByRowCol(rowNum, CIRC_COD_COL);
+            }
+
+            refString = codString;            
             
           } //NIVEL DE TENSION
           else if (refCol == REF_DUENO_RED_COL) {        
@@ -186,14 +202,12 @@ int MyApp::Main() {
               refString = refFiltered.getStringByRowCol(row,refCol);
           }
 
-          tc1String = tc1File.content.getStringByRowCol(fronteraTc1Row,tc1Col);
+          tc1String = tc1File.content.getStringByRowCol(fronteraTc1Row,tc1Col);          
           
-          //TODO remove empty filter
-          if(!refString.empty() &&
-            refString.compare(tc1String) != 0) {
+          if(refString.compare(tc1String) != 0) {
             tmpRow.clear();
             tmpRow.push_back(fronteraName); tmpRow.push_back(refTitle + ": " + refString + ", " + tc1Title + ": " + tc1String);            
-            result.addRow(tmpRow);            
+            result.addRow(tmpRow);
           }        
         }
       } else {
@@ -205,7 +219,7 @@ int MyApp::Main() {
 
   // ------------------  6. Check if missed fronteras  
   int tc1Fronteras = tc1File.content.getTotalRow()-1;
-  int refFronteras =  fronteras.size();
+  int refFronteras = fronteras.size();
 
   cout << endl << tc1Fronteras << " fronteras en tc1" << endl;
   cout << refFronteras << " fronteras de Mithra encontradas en tc1" << endl << endl;
