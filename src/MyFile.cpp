@@ -94,12 +94,15 @@ void MyFile::printFileInfo() {
 
 }
 
-bool MyFile::isExpectedDelimitator(string line) {
+MyFile::DELIMITATOR MyFile::getDelimitator(string line) {
+
   if (line.find(DELIMITATOR1) != string::npos) {
-    return true;
+    return DELIMITATOR_1;
+  } else if (line.find(DELIMITATOR2) != string::npos) {    
+    return DELIMITATOR_2;
   } else {
-    cout<<"ERROR: Verifique que el delimitador es ';' en el archivo: [" << _path << "]" << endl;
-    return false;
+    cout<<"ERROR: Verifique que el delimitador es ';' o ',' en el archivo: [" << _path << "]" << endl;
+    return DELIMITATOR_UNKWON;
   }
 }
 
@@ -109,24 +112,29 @@ bool MyFile::readCsv() {
   string line, word;
   fstream file(_path, ios::in);
   bool firstRow = true;
+  DELIMITATOR delimit;
+  char del;
 
   if(file.is_open()){
     while(getline(file, line))//get each line in file
     {
-      //Check if ';' delimitator
-      if(firstRow) {         
-        if (isExpectedDelimitator(line)) {
-          firstRow = false;          
-        } else {          
-          return false;
+      //Check if ';' or ',' delimitator
+      if(firstRow) {
+        delimit = getDelimitator(line);
+        if(delimit == DELIMITATOR_UNKWON) {
+          return false;          
+        } else {
+          firstRow = false;                    
         }
       }
 
+      del = (delimit == DELIMITATOR_1) ? DELIMITATOR1 : DELIMITATOR2;
+      
       row.clear();
       stringstream str(line); //get whole line string
  
       //get each word in str sepparated by ; 
-      while(getline(str, word, DELIMITATOR1)) {
+      while(getline(str, word, del)) {
         row.push_back(word); //save each word in row
       }    
 

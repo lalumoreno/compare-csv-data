@@ -6,16 +6,25 @@
 class MyFile{
 
 private:
+
+  enum DELIMITATOR
+  {
+    DELIMITATOR_1,
+    DELIMITATOR_2,
+    DELIMITATOR_UNKWON
+  }; 
+
   std::string _path;
   std::string _filter;
   
-  bool isCsvFormat(std::string path);
-  bool isExpectedDelimitator(std::string line);  
+  bool isCsvFormat(std::string path);  
   bool requestCsvPath(void);
   bool readCsv();
   bool setCsvPath(std::string path);
+  DELIMITATOR getDelimitator(std::string line);
 
 public:
+
   MyFile(){};
   MyFile(std::string path):_path(path){};
   
