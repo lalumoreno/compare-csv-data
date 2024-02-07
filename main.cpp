@@ -1,14 +1,16 @@
 #include <iostream>
-#include "MyApp.hpp"
+#include "MyInterfaz.hpp"
 
 using namespace std;
 
 int main()
 {
-  MyApp app; 
-    
-  app.showAppDescription();
-  app.showAppUse();
+  MyInterfaz app; 
+
+  app.setDescription("Este programa crea el archivo interfaz54.csv en base a los datos de ...");
+  app.setUse("Verifique que...");
+  app.showDescription();
+  app.showUse();
 
   app.Main();
   

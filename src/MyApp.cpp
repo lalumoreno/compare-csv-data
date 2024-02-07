@@ -37,26 +37,29 @@ using namespace std;
 #define CIRC_NAME_COL   6-1  //Nombre
 #define CIRC_COD_COL    8-1  //Codigo alimentador
 
+
+MyApp::MyApp() {
+  setName("App Name");
+  setVersion("1.0.0");
+  setDescription("Add description here");
+  setUse("Add how to use the app here");
+}
+
 //TODO read from file
-void MyApp::showAppDescription() {  
+void MyApp::showDescription() {  
   
     cout << "************************************************************************************" << endl;
-    cout << "                                     compare-tc1 V. "<< VERSION << endl;    
-    cout << "Este programa compara los datos del documento de Mithra con los datos del TC1 para" << endl;
-    cout << "cada frontera segun el filtro seleccionado y devuelve las diferencias " << endl;    
+    cout << "                                     " << this->getName() << " " << this->getVersion() << endl;    
+    cout << this->getDescription() << endl;
     cout << "************************************************************************************" << endl << endl;
 }
 
 //TODO read from file
-void MyApp::showAppUse() {  
+void MyApp::showUse() {  
   
     cout << "************************************************************************************" << endl;    
     cout << "Antes de empezar:" << endl;
-    cout << "1. Verifique que junto a este programa se encuentra la carpeta 'files' con los  " << endl; 
-    cout << "   siguientes archivos: config.csv, Circuitos_Todos.csv, propActivoNT1.csv y " << endl;
-    cout << "   Fron_y_Asoc.csv" << endl;
-    cout << "2. Verifique que todos los archivos se encuentran en formato csv separado" << endl;
-    cout << "   por ';' o ','" << endl;    
+    cout << this->getUse() << endl;
     cout << "************************************************************************************" << endl << endl;
 }
 

@@ -9,8 +9,13 @@
 class MyApp {
 
 private:
-    std::string menuOption;
+    std::string name;
+    std::string version;    
+    std::string description;
+    std::string use;
     
+    std::string menuOption;
+        
 public: 
     
     enum{
@@ -20,10 +25,20 @@ public:
         NOT_VALID
     };
 
-    void showAppDescription();
-    void showAppUse();    
-    int enterToContinue(std::string text);    
-    int Main();
+    MyApp();
+    void setName(std::string n) {this->name = n;};
+    void setVersion(std::string ver) {this->version = ver;};
+    void setDescription(std::string desc) {this->description = desc;};        
+    void setUse(std::string u) {this->use = u;};        
+    std::string getName() {return this->name;};
+    std::string getVersion() {return this->version;};
+    std::string getDescription() {return this->description;};
+    std::string getUse() {return this->use;};
+
+    void showDescription();    
+    void showUse();
+    int enterToContinue(std::string text);
+    virtual int Main();
 
 };
 

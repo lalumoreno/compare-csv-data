@@ -26,6 +26,17 @@ void MyFile::requestOpenFile(string FileName, bool printInfo) {
   }   
 }
 
+bool MyFile::createFile(string filePath) {
+     
+    if ( !setCsvPath(filePath) ) {
+      return false;
+    }   
+
+    //if (printInfo) printFileInfo();
+
+    return true;
+}
+
 bool MyFile::openFile(string filePath, bool printInfo) {
      
     if ( !setCsvPath(filePath) ) {

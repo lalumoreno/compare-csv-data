@@ -37,6 +37,7 @@ public:
   void requestOpenFile(std::string FileName, bool printInfo) ;
   bool openFile(std::string filePath, bool printInfo);  
   bool writeCsv();
+  bool createFile(std::string filePath);  
 };
 
 #endif
