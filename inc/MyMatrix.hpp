@@ -9,7 +9,7 @@ class MyMatrix {
 private:
     std::vector<std::vector<std::string>> _matrix;
 
-public:
+public:    
     int getTotalRow(){ return _matrix.size();}
     int getTotalCol(){ return _matrix.size() > 0 ? _matrix[0].size() : 0;}
     void printMatrix();
