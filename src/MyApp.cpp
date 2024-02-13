@@ -49,7 +49,7 @@ MyApp::MyApp() {
 void MyApp::showDescription() {  
   
     cout << "************************************************************************************" << endl;
-    cout << "                                     " << this->getName() << " " << this->getVersion() << endl;    
+    cout << "                                  " << this->getName() << " V." << this->getVersion() << endl;    
     cout << this->getDescription() << endl;
     cout << "************************************************************************************" << endl << endl;
 }
@@ -79,16 +79,16 @@ int MyApp::Main() {
   //TODO check if empty files
   //Open reference document by name  
   MyFile refFile;
-  if(!refFile.openFile(FILE_MITHRA, true)) return APP_FAILURE; //TODO check that is Mithra valid doc    
+  if(!refFile.readFile(FILE_MITHRA, true)) return APP_FAILURE; //TODO check that is Mithra valid doc    
   //Open config file for column association    
   MyFile configFile;                        
-  if (!configFile.openFile(FILE_CONFIG, false)) return APP_FAILURE; //TODO check that is a config valid doc
+  if (!configFile.readFile(FILE_CONFIG, false)) return APP_FAILURE; //TODO check that is a config valid doc
   //Open numeroCircuito file for comparison
   MyFile circuits;
-  if(!circuits.openFile(FILE_NUM_CIRCUITO, false)) return APP_FAILURE;
+  if(!circuits.readFile(FILE_NUM_CIRCUITO, false)) return APP_FAILURE;
   //Open propiedad activo file for comparison
   MyFile propNT1File;
-  if(!propNT1File.openFile(FILE_PROP_NT1, false)) return APP_FAILURE;  
+  if(!propNT1File.readFile(FILE_PROP_NT1, false)) return APP_FAILURE;  
   //Open TC1 by name
   MyFile tc1File;
   tc1File.requestOpenFile("TC1", true);           //TODO check that is tc1 valid doc    

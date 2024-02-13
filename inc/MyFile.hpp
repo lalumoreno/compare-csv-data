@@ -35,7 +35,7 @@ public:
   void printFileInfo();
   void setFilterFromList(std::vector <std::string> v);
   void requestOpenFile(std::string FileName, bool printInfo) ;
-  bool openFile(std::string filePath, bool printInfo);  
+  bool readFile(std::string filePath, bool printInfo);  
   bool writeCsv();
   bool createCsv(std::string filePath);  
 };

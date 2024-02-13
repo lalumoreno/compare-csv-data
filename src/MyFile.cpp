@@ -11,6 +11,7 @@
 using namespace std;
 
 string FILE_FORMAT = ".csv";
+string FILE_FORMAT2 = ".CSV";
 
 //with user input
 void MyFile::requestOpenFile(string FileName, bool printInfo) {
@@ -28,14 +29,14 @@ void MyFile::requestOpenFile(string FileName, bool printInfo) {
 
 bool MyFile::createCsv(string filePath) {
      
-    if ( !setCsvPath(filePath) ) {
+    if ( !setCsvPath(filePath) ) {      
       return false;
     }   
  
     return true;
 }
 
-bool MyFile::openFile(string filePath, bool printInfo) {
+bool MyFile::readFile(string filePath, bool printInfo) {
      
     if ( !setCsvPath(filePath) ) {
       return false;
@@ -60,8 +61,10 @@ bool MyFile::isCsvFormat(string path) {
   string format = path.substr(path.size()-FILE_FORMAT.size());
   
   if(format.compare(FILE_FORMAT) != 0 ) {
-    cout << "ERROR: El formato debe ser .csv [" << path  << "]"<< endl; 
-    return false;
+    if(format.compare(FILE_FORMAT2) != 0 ) {
+      cout << "ERROR: El formato debe ser .csv [" << path  << "]"<< endl; 
+      return false;
+    }
   }
 
   return true;

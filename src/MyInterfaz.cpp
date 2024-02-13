@@ -3,65 +3,57 @@
 #include <ctime>
 #include <sstream>
 #include <algorithm>
+#include <string>
+#include <filesystem>
 
 #include "MyInterfaz.hpp"
 #include "MyFile.hpp"
 
 using namespace std;
+using std::filesystem::directory_iterator;
 
-#define VERSION "1.0.4"
 
-#define FILE_CONFIG       "files/config.csv"
-#define FILE_PROP_NT1     "files/propActivoNT1.csv"
-#define FILE_NUM_CIRCUITO "files/Circuitos_Todos.csv"
-#define FILE_MITHRA       "10/Fron_y_Asoc.csv"//"files/Fron_y_Asoc.csv"
+#define FILE_OPERADOR     "files/OperadoresRed.csv"
+#define FILE_MITHRA       "files/Fron_y_Asoc.csv"
 
-#define TITLE_ROW         0
-#define FIRST_VALUE_ROW   1
-
-#define FIRST_COL    0
-#define SECOND_COL    1
-
-#define CONFIG_REF_COL    1
-#define CONFIG_TC1_COL    2
-
-#define CONFIG_NIVEL_TENSION_ROW    4
-#define CONFIG_NUM_CIRCUITO_ROW1    5
-#define CONFIG_NUM_CIRCUITO_ROW2    6
-#define CONFIG_DUENO_RED_ROW        7
-
-#define TC1_NUM_CIRCUITO_COL1  2-1    //TODO change name
-#define TC1_NUM_CIRCUITO_COL2  12-1   //TODO change name
-
-#define CIR_ID_COL      5-1  //ID Circuito
-#define CIRC_NAME_COL   6-1  //Nombre
-#define CIRC_COD_COL    8-1  //Codigo alimentador
+#define COL_DIU           2-1
+#define COL_DIUM          3-1
+#define COL_FIU           4-1
+#define COL_FIUM          5-1
+#define COL_FIUG          8-1
+#define COL_DIUG          9-1
 
 
 int MyInterfaz::Main() {
-
-  printf("Main of interfaz\n");
-  // ------------------  1. Open all files 
-  //TODO check if empty files
-  //Open reference document by name  
-  MyFile refFile;
-  if(!refFile.openFile(FILE_MITHRA, true)) return APP_FAILURE;  
   
+  // ------------------  1. Open all reference files   
+  //Open references document by name
+  MyFile fronterasFile;
+  if(!fronterasFile.readFile(FILE_MITHRA, true)) return APP_FAILURE;  
+  
+  MyFile operadoresFile;
+  if(!operadoresFile.readFile(FILE_OPERADOR, true)) return APP_FAILURE;    
+
   // ------------------  2. Ask period to evaluate
-  std::string option;
-  cout << "Ingrese ciclo [YYYMM]: ";
+  std::string cycle;
+  cout << "Ingrese ciclo [YYYYMM]: ";
 
   while(true) {
-    cin >> option;
+    cin >> cycle;
     cin.clear();
-    //TODO evaluate format
+    cout << endl;
     break;
-  }
-  cout << "Ciclo: " << option << endl;  
-
+  }  
+  
   //  ------------------  3. Create csv file 
-  MyFile testFile;  
-  if(!testFile.createCsv("files/laura.csv")) return APP_FAILURE;
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::ostringstream oss;
+  oss << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
+  string outputName = "files/INTERFACE54CALIDAD_" + oss.str() + ".csv";
+  
+  MyFile outputFile;  
+  if(!outputFile.createCsv(outputName)) return APP_FAILURE;  
   
   vector<string> tmpRow;  
   tmpRow.clear();
@@ -70,40 +62,93 @@ int MyInterfaz::Main() {
   tmpRow.push_back("DIUG"); tmpRow.push_back("FIUG"); tmpRow.push_back("DIU");
   tmpRow.push_back("DIUM"); tmpRow.push_back("FIU"); tmpRow.push_back("FIUM");
   
-  testFile.content.addRow(tmpRow);
-  //testFile.writeCsv();
+  outputFile.content.addRow(tmpRow);  
 
-  //  ------------------  4. Open first file AIRE
-  MyFile aireFile;
-  if(!aireFile.openFile("10/AIRE.csv", true)) return APP_FAILURE;
-
-  vector<string> row;
-  row = aireFile.content.getRowDatabyRow(1);
-  string niu = row.at(0);
   
-  //Look niu in front and asc
-  cout << "niu :" << niu.c_str()<<endl;
-  int rowofniu = refFile.content.getRowByStringInCol(34, niu);
-  if(rowofniu < 0){
-    cout << "NIU no encontrado: " << niu << endl;
+  //  ------------------  4. Get list of CS2 files
+  string path = "files/CS2/";
+  vector<string> cs2List;  
+  for (const auto & entry : directory_iterator(path)){
+    cs2List.push_back(entry.path().string());        
+  }
+
+  if(cs2List.size() < 1) {
+    cout << "No se encontraron archivos en " << path << endl;
     return APP_FAILURE;
   } 
 
-  //Get sic
-  cout << "niu encontrado en fila: " << rowofniu << endl;
-  string sic = refFile.content.getStringByRowCol(rowofniu, 5);
-  cout << "sic: " << sic << endl;
 
-  //Step 4 : sacar ID_OR
-  tmpRow.clear();
-  tmpRow.push_back(option); 
-  tmpRow.push_back(sic); 
-  //tmpRow.push_back("ID_OR");
-  // tmpRow.push_back("GRUPO_CALIDAD"); tmpRow.push_back("CODIGO_TX"); tmpRow.push_back("NIU");
-  // tmpRow.push_back("DIUG"); tmpRow.push_back("FIUG"); tmpRow.push_back("DIU");
-  // tmpRow.push_back("DIUM"); tmpRow.push_back("FIU"); tmpRow.push_back("FIUM");
-  
-  // testFile.content.addRow(tmpRow);
+  //  ------------------  5. Open each CS2 file
+  cout << "Abriendo archivos CS2: " << endl;
+  for(const auto& cs2 : cs2List) {
+
+    MyFile cs2File;
+    if(!cs2File.readFile(cs2, true)) {
+      continue;
+      return APP_FAILURE;
+    }    
+
+    for(int row = 1; row < cs2File.content.getTotalRow(); row++) {
+      vector<string> rowSelected;
+      rowSelected = cs2File.content.getRowDatabyRow(row);
+      string niu = rowSelected.at(0);
+      
+      //  Find NIU in front and asc
+      //cout << "niu :" << niu.c_str()<<endl;
+      int rowNiu = fronterasFile.content.getRowByStringInCol(34, niu);
+      if(rowNiu < 0){
+        //cout << "NIU no encontrado: " << niu << endl;
+        continue;        
+      } 
+
+      //  Get SIC      
+      string sic = fronterasFile.content.getStringByRowCol(rowNiu, 5);
+      //cout << "sic: " << sic << endl;
+
+      //  Find OPERADOR_RED
+      string op_red = fronterasFile.content.getStringByRowCol(rowNiu, 26);
+      //cout << "op_red: " << op_red << endl;
+      int rowOp = operadoresFile.content.getRowByStringInCol(4,op_red);
+      if(rowOp < 0){
+        cout << "OPERADOR_RED no encontrado en OperadoresRed.csv : " << op_red << endl;
+        return APP_FAILURE;
+      }
+
+      //  Get Sigla
+      //cout << "Sigla fila: " << rowop << endl;
+      string id_op = operadoresFile.content.getStringByRowCol(rowOp, 0);
+      //cout << "id_op: " << id_op << endl;
+
+      //  Set diu/fiu
+      string diu = rowSelected.at(COL_DIU);
+      string dium = rowSelected.at(COL_DIUM);
+      string fiu = rowSelected.at(COL_FIU);
+      string fium = rowSelected.at(COL_FIUM);
+      string fiug = rowSelected.at(COL_FIUG);
+      string diug = rowSelected.at(COL_DIUG);
+
+      tmpRow.clear();
+      tmpRow.push_back(cycle); 
+      tmpRow.push_back(sic);
+      tmpRow.push_back(id_op);  //ID_OR  
+      tmpRow.push_back("11");   //GRUPO_CALIDAD
+      tmpRow.push_back(id_op);  //CODIGO_TX
+      tmpRow.push_back(niu);    //NIU
+      tmpRow.push_back(diug);   //DIUG
+      tmpRow.push_back(fiug);   //FIUG
+      tmpRow.push_back(diu);    //DIU
+      tmpRow.push_back(dium);   //DIUM
+      tmpRow.push_back(fiu);    //FIU
+      tmpRow.push_back(fium);   //FIUM
+      
+      outputFile.content.addRow(tmpRow);
+    }
+  }
+
+  // ------------------  6. Save result in file
+  if(outputFile.writeCsv()) cout << "Resultado guardado en " << outputFile.getPath() << endl << endl;
+
+  enterToContinue("");
 
   return APP_SUCCESS;
 }
